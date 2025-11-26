@@ -330,15 +330,14 @@ ui <- fluidPage(
     ),
     tags$style(HTML(".plotly .bg { fill: transparent !important; }")), #Doesn't work to remove background from treemap
     tags$link(rel = "stylesheet", type = "text/css", href = "https://fonts.googleapis.com/css?family=Open+Sans"),
-    #TODO: UPDATE WITH GOOGLE ANALYTIC INFO WHEN READY
-    # HTML('<!-- Google tag (gtag.js) -->
-    #   <script async src="https://www.googletagmanager.com/gtag/js?id=G-86RWSCBY80"></script>
-    #   <script>
-    #     window.dataLayer = window.dataLayer || [];
-    #     function gtag(){dataLayer.push(arguments);}
-    #     gtag("js", new Date());
-    #     gtag("config", "G-86RWSCBY80");
-    #   </script>')
+    HTML('<!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N53SZJ2RLV"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag("js", new Date());
+        gtag("config", "G-N53SZJ2RLV");
+      </script>')
   ),
   
   HTML('
