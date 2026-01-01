@@ -1,6 +1,6 @@
 # Data Cleaning for Anxiety Descriptive Dashboard 
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, rio, here, janitor, xml2, metafor)
+pacman::p_load(tidyverse, rio, here, janitor, xml2, metafor, rmarkdown)
 
 # Import Data ------------------------------------------------------------------
 ## Study chharacteristics ------------------------------------------------------
