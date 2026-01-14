@@ -3,9 +3,22 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, rio, here, janitor, xml2, metafor, rmarkdown)
 
 # Import Data ------------------------------------------------------------------
-## Study chharacteristics ------------------------------------------------------
+## Study characteristics ------------------------------------------------------
 d_study <- import(here("data", "APO_study_level.xlsx")) %>% 
   janitor::clean_names()
+
+# Import and clean ROB data
+d_rob <- import(here("data", "APO_study_ROB.xlsx")) %>% 
+  janitor::clean_names() %>% 
+  select(refid, contains("overall"), -contains("explanation")) %>% 
+  mutate(
+    overall_rating = coalesce(
+      na_if(robins_overall_judgment, ""),
+      na_if(crob_overall_judgment, ""),
+      na_if(irob_overall_decision, "")
+    )
+  ) %>% 
+  select(refid, overall_rating)
 
 ## Meta-Analysis data files ----------------------------------------------------
 d_anxiety <- import(here("data", "Anxiety_Symptoms.xlsx"))
@@ -455,7 +468,8 @@ td_full_ma <- td_full_ma %>%
          )
 
 ## Merge study and MA data -----------------------------------------------------
-td_merged <- left_join(td_full_ma , td_study, by = "refid")
+td_merged <- left_join(td_full_ma , td_study, by = "refid") %>% 
+  left_join(d_rob , by = "refid")
 
 
 # ST update to calculate SMD for categorical variables -------------------------
@@ -529,5 +543,5 @@ if (length(rows_without_logic) > 0) {
 
 
 # Export -----------------------------------------------------------------------
-#export(td_merged, here("data", "app_data.csv"))
+#rio::export(td_merged, here("data", "app_data.csv"))
 

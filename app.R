@@ -401,18 +401,16 @@ document.addEventListener("DOMContentLoaded", function() {
              style = "margin-left: 10px; margin-top: 18px; font-size: 20px",
              HTML("
         <b>Overview:</b>This dashboard presents data from studies included in our <a href='https://github.com/HEDCO-Institute/Anxiety_prevention_overview' target='_blank'>
-          meta-analysis of school-based anxiety prevention programs
-        </a>. The Forest Plot shows 
+          meta-analysis of school-based anxiety prevention programs</a>. The Forest Plot tab shows 
         information about each primary study (intervention, comparison, outcome, timing, 
         and effect size). The Visualizations tab provides plots of descriptive summaries 
         across studies.<br><br>
 
         <b>Instructions:</b> Explore information for all included studies, or use the 
-        drop-downs to filter studies to only those with specific criteria. Changing any 
-        filter will update the number of studies, Forest Plot, and Visualizations tab.<br><br>
+        drop-downs to filter studies based on specific criteria. Changing any 
+        filter will update the number of studies, as well as data in the Forest Plot and Visualizations tab.<br><br>
 
-        Hover over effect size estimates to see additional information about the 
-        study. You can toggle hover information on or off using the Hover Information button.<br><br>
+        Intervention effects will display as a dot in the middle column. Hover over the dot to see more details.<br><br>
 
         <b>Note:</b> The total number of studies shown reflects only those included in the 
         meta-analysis, not all studies for which we have descriptive data.
@@ -469,7 +467,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     div(style = "margin-top: 22px;"),
                     pickerInput(
                       inputId = "intervention_group_filter",
-                      label = "Intervention Group",
+                      label = "Intervention Name",
                       choices = intervention_group_choices,
                       selected = intervention_group_choices,
                       multiple = TRUE,
@@ -541,7 +539,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     div(style = "margin-top: 12px;"),
                     pickerInput(
                       inputId = "outcome_family_filter",
-                      label = "Outcome Measure Group",
+                      label = "Outcome Measure Name",
                       choices = outcome_measure_family_choices,
                       selected = outcome_measure_family_choices,
                       multiple = TRUE,
@@ -592,7 +590,16 @@ document.addEventListener("DOMContentLoaded", function() {
                    "Hover Information: ON"
                  ), 
                  class = "btn-info btn-sm", 
-                 style = "background-color: #007030 ; border-color: #007030 ; color: white; font-size: clamp(10px, 1.8vw, 14px); padding: 15px 8px; white-space: nowrap; width: 90%; margin-left: -20px; height: 60px; display: flex; align-items: center; justify-content: center;"
+                 style = "background-color: #007030 ; 
+                 border-color: #007030 ;
+                 color: white;
+                 font-size: clamp(10px, 1.8vw, 14px);
+                 padding: 15px 8px; 
+                 white-space: normal;
+                 text-align: center;
+                 width: 90%; margin-left: -20px; 
+                 height: 60px; display: flex; align-items: center; 
+                 justify-content: center;"
                )
            )
     )
@@ -1851,9 +1858,9 @@ server <- function(input, output, session) {
       div(
         style = "margin-left: 10px; margin-top: 22px; font-size: 18px",
         if (current_page == 1) {
-          paste0("Outcome Measure Groups Used in >2 Studies")
+          paste0("Outcome Measure Names Used in >2 Studies")
         } else {
-          paste0("Outcome Measure Groups Used in ≤2 Studies")
+          paste0("Outcome Measure Names Used in ≤2 Studies")
         }
       ),
       div(
@@ -2306,6 +2313,7 @@ server <- function(input, output, session) {
           
           # Aggregation type
           effect_outcome_type  = effect_outcome_type,
+          overall_rating = overall_rating,
           
           # Cleaned study-level descriptors
           clean_grade_band           = clean_grade_band,      # K-8 / 9-12 / K-12 / Unclear
@@ -2375,19 +2383,23 @@ server <- function(input, output, session) {
     else {
       merged_forest$border_top <- FALSE
       
-      group_cols <- c("Study Author Year", "Intervention", "Comparison", "Outcome Domain", "Outcome Measure")
+      merged_forest <- merged_forest %>%
+        dplyr::mutate(Weeks_sort = suppressWarnings(as.numeric(Weeks)))
+      
+      group_cols <- c("Study Author Year", "Intervention", "Comparison", "Outcome Domain", "Outcome Measure", "Weeks_sort")
       if (nrow(merged_forest) > 1) {
         merged_forest <- merged_forest[do.call(order, merged_forest[group_cols]), ]
       }
       
-      # Store original data BEFORE blanking for tooltips
       original_forest_pre_blank <- merged_forest
       merged_forest <- hierarchical_blanker(merged_forest, group_cols)
+      
+      merged_forest <- merged_forest %>% dplyr::select(-Weeks_sort)
+      
       row_height <- calculate_dynamic_row_height(merged_forest)
       
       ################################################################################
       ### CATEGORICAL OUTCOME HANDLING - START (SECTION 1 of 3)
-      ### TODO: Replace this section when final solution for categorical outcomes is decided
       ################################################################################
       is_categorical <- original_forest_pre_blank$effect_outcome_type == "Categorical"
       
@@ -2468,7 +2480,7 @@ server <- function(input, output, session) {
           
           tooltip_parts <- c(
             tooltip_parts,
-            paste0("Effect Size: <b>", effect_size_display, "</b>"),
+            #paste0("Effect Size: <b>", effect_size_display, "</b>"),
             "",
             paste0("Country: <b>", format_viz_value(orig_data$clean_country), "</b>"),
             paste0("School Level: <b>", format_viz_value(orig_data$clean_grade_band), "</b>"),
@@ -2482,7 +2494,8 @@ server <- function(input, output, session) {
             paste0("% Female: <b>", format_viz_value(orig_data$study_percent_female, TRUE), "</b>"),
             paste0("% FRPL: <b>", format_viz_value(orig_data$study_percent_frpl, TRUE), "</b>"),
             paste0("% ELL: <b>", format_viz_value(orig_data$study_percent_ell, TRUE), "</b>"),
-            paste0("Race/Ethnicity: <b>", race_ethnicity_display, "</b>")
+            paste0("Race/Ethnicity: <b>", race_ethnicity_display, "</b>"),
+            paste0("Risk of Bias: <b>", orig_data$overall_rating, "</b>")
           )
           
           return(paste(tooltip_parts, collapse = "<br>"))
@@ -2542,9 +2555,17 @@ server <- function(input, output, session) {
       )
       
       display_cols <- c(
-        "Study Author Year", "Intervention", "Comparison", 
-        "Outcome Domain", "Outcome Measure", "Weeks", "SMD", " ", "border_top"
+        "Intervention",
+        "Outcome Domain",
+        "Weeks",
+        " ",
+        "SMD",
+        "Outcome Measure",
+        "Comparison",
+        "Study Author Year",
+        "border_top"
       )
+      
       merged_forest <- merged_forest[, display_cols, drop = FALSE]
       merged_forest <- tibble::as_tibble(merged_forest)
     }
@@ -2554,31 +2575,6 @@ server <- function(input, output, session) {
     rt <- reactable(
       merged_forest,
       columns = list(
-        `Study Author Year` = colDef(
-          name = "Study Author Year",
-          minWidth = 130,
-          sortable = FALSE,
-          html = TRUE,
-          cell = function(value, index) {
-            original_value <- original_forest_pre_blank$`Study Author Year`[index]
-            create_cell_with_hover(value, original_value, "study", index)
-          },
-          style = function(value, index) {
-            style_list <- list(
-              whiteSpace = "normal",
-              wordWrap = "break-word", 
-              lineHeight = "1.4",
-              padding = "12px",
-              fontSize = "13px",
-              verticalAlign = "top"
-            )
-            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
-              style_list$borderTop <- "2px solid #ccc"
-            }
-            style_list
-          },
-          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
-        ),
         `Intervention` = colDef(
           name = "Intervention",
           minWidth = 220,
@@ -2604,31 +2600,7 @@ server <- function(input, output, session) {
           },
           headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
         ),
-        `Comparison` = colDef(
-          name = "Comparison",
-          minWidth = 120,
-          sortable = FALSE,
-          html = TRUE,
-          cell = function(value, index) {
-            original_value <- original_forest_pre_blank$Comparison[index]
-            create_cell_with_hover(value, original_value, "comparison", index)
-          },
-          style = function(value, index) {
-            style_list <- list(
-              whiteSpace = "normal",
-              wordWrap = "break-word",
-              lineHeight = "1.4",
-              padding = "12px",
-              fontSize = "13px",
-              verticalAlign = "top"
-            )
-            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
-              style_list$borderTop <- "2px solid #ccc"
-            }
-            style_list
-          },
-          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
-        ),
+        
         `Outcome Domain` = colDef(
           name = "Outcome Domain",
           minWidth = 120,
@@ -2654,38 +2626,7 @@ server <- function(input, output, session) {
           },
           headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
         ),
-        `Outcome Measure` = colDef(
-          name = "Outcome Measure",
-          minWidth = 200,
-          sortable = FALSE,
-          html = TRUE,
-          cell = function(value, index) {
-            # Add * to displayed outcome name for categorical outcomes
-            display_value <- value
-            if (!is.null(display_value) && !is.na(display_value) && display_value != "" &&
-                !is.null(is_categorical) && length(is_categorical) >= index && is_categorical[index]) {
-              display_value <- paste0(display_value, " *")
-            }
-            
-            original_value <- original_forest_pre_blank$`Outcome Measure`[index]
-            create_cell_with_hover(display_value, original_value, "measure", index)
-          },
-          style = function(value, index) {
-            style_list <- list(
-              whiteSpace = "normal",
-              wordWrap = "break-word",
-              lineHeight = "1.4",
-              padding = "12px",
-              fontSize = "13px",
-              verticalAlign = "top"
-            )
-            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
-              style_list$borderTop <- "2px solid #ccc"
-            }
-            style_list
-          },
-          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
-        ),
+        
         `Weeks` = colDef(
           name = "Weeks Post-Intervention",
           width = 95,
@@ -2704,24 +2645,7 @@ server <- function(input, output, session) {
           },
           headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
         ),
-        `SMD` = colDef(
-          name = "SMD",
-          width = 80,
-          sortable = FALSE,
-          style = function(value, index) {
-            style_list <- list(
-              textAlign = "center",
-              padding = "12px",
-              fontSize = "13px",
-              verticalAlign = "middle"
-            )
-            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
-              style_list$borderTop <- "2px solid #ccc"
-            }
-            style_list
-          },
-          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
-        ),
+        
         ` ` = colDef(
           html = TRUE,
           minWidth = 400,
@@ -2750,6 +2674,109 @@ server <- function(input, output, session) {
             background = "#fff"
           )
         ),
+        
+        `SMD` = colDef(
+          name = "SMD",
+          width = 80,
+          sortable = FALSE,
+          style = function(value, index) {
+            style_list <- list(
+              textAlign = "center",
+              padding = "12px",
+              fontSize = "13px",
+              verticalAlign = "middle"
+            )
+            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
+              style_list$borderTop <- "2px solid #ccc"
+            }
+            style_list
+          },
+          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
+        ),
+        
+        `Outcome Measure` = colDef(
+          name = "Outcome Measure",
+          minWidth = 200,
+          sortable = FALSE,
+          html = TRUE,
+          cell = function(value, index) {
+            display_value <- value
+            if (!is.null(display_value) && !is.na(display_value) && display_value != "" &&
+                !is.null(is_categorical) && length(is_categorical) >= index && is_categorical[index]) {
+              display_value <- paste0(display_value, " *")
+            }
+            original_value <- original_forest_pre_blank$`Outcome Measure`[index]
+            create_cell_with_hover(display_value, original_value, "measure", index)
+          },
+          style = function(value, index) {
+            style_list <- list(
+              whiteSpace = "normal",
+              wordWrap = "break-word",
+              lineHeight = "1.4",
+              padding = "12px",
+              fontSize = "13px",
+              verticalAlign = "top"
+            )
+            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
+              style_list$borderTop <- "2px solid #ccc"
+            }
+            style_list
+          },
+          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
+        ),
+        
+        `Comparison` = colDef(
+          name = "Comparison",
+          minWidth = 120,
+          sortable = FALSE,
+          html = TRUE,
+          cell = function(value, index) {
+            original_value <- original_forest_pre_blank$Comparison[index]
+            create_cell_with_hover(value, original_value, "comparison", index)
+          },
+          style = function(value, index) {
+            style_list <- list(
+              whiteSpace = "normal",
+              wordWrap = "break-word",
+              lineHeight = "1.4",
+              padding = "12px",
+              fontSize = "13px",
+              verticalAlign = "top"
+            )
+            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
+              style_list$borderTop <- "2px solid #ccc"
+            }
+            style_list
+          },
+          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
+        ),
+        
+        `Study Author Year` = colDef(
+          name = "Study Author Year",
+          minWidth = 130,
+          sortable = FALSE,
+          html = TRUE,
+          cell = function(value, index) {
+            original_value <- original_forest_pre_blank$`Study Author Year`[index]
+            create_cell_with_hover(value, original_value, "study", index)
+          },
+          style = function(value, index) {
+            style_list <- list(
+              whiteSpace = "normal",
+              wordWrap = "break-word",
+              lineHeight = "1.4",
+              padding = "12px",
+              fontSize = "13px",
+              verticalAlign = "top"
+            )
+            if (!is.null(merged_forest$border_top) && length(merged_forest$border_top) >= index && merged_forest$border_top[index]) {
+              style_list$borderTop <- "2px solid #ccc"
+            }
+            style_list
+          },
+          headerStyle = list(borderBottom = "3px solid #333", borderTop = "3px solid #333")
+        ),
+        
         border_top = colDef(show = FALSE)
       ),
       bordered = TRUE,
