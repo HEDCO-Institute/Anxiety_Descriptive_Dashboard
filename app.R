@@ -394,30 +394,30 @@ document.addEventListener("DOMContentLoaded", function() {
     )
   ),
   
-  ## Instructions---------
-  fluidRow(
-    column(12,
-           div(
-             style = "margin-left: 10px; margin-top: 18px; font-size: 20px",
-             HTML("
-        <b>Overview:</b>This dashboard presents data from studies included in our <a href='https://github.com/HEDCO-Institute/Anxiety_prevention_overview' target='_blank'>
-          meta-analysis of school-based anxiety prevention programs</a>. The Forest Plot tab shows 
-        information about each primary study (intervention, comparison, outcome, timing, 
-        and effect size). The Visualizations tab provides plots of descriptive summaries 
-        across studies.<br><br>
-
-        <b>Instructions:</b> Explore information for all included studies, or use the 
-        drop-downs to filter studies based on specific criteria. Changing any 
-        filter will update the number of studies, as well as data in the Forest Plot and Visualizations tab.<br><br>
-
-        Intervention effects will display as a dot in the middle column. Hover over the dot to see more details.<br><br>
-
-        <b>Note:</b> The total number of studies shown reflects only those included in the 
-        meta-analysis, not all studies for which we have descriptive data.
-      ")
-             )
-    )
-  ),
+  # ## Instructions---------
+  # fluidRow(
+  #   column(12,
+  #          div(
+  #            style = "margin-left: 10px; margin-top: 18px; font-size: 20px",
+  #            HTML("
+  #       <b>Overview:</b>This dashboard presents data from studies included in our <a href='https://github.com/HEDCO-Institute/Anxiety_prevention_overview' target='_blank'>
+  #         meta-analysis of school-based anxiety prevention programs</a>. The Forest Plot tab shows 
+  #       information about each primary study (intervention, comparison, outcome, timing, 
+  #       and effect size). The Visualizations tab provides plots of descriptive summaries 
+  #       across studies.<br><br>
+  # 
+  #       <b>Instructions:</b> Explore information for all included studies, or use the 
+  #       drop-downs to filter studies based on specific criteria. Changing any 
+  #       filter will update the number of studies, as well as data in the Forest Plot and Visualizations tab.<br><br>
+  # 
+  #       Intervention effects will display as a dot in the middle column. Hover over to see more details.<br><br>
+  # 
+  #       <b>Note:</b> The total number of studies shown reflects only those included in the 
+  #       meta-analysis, not all studies for which we have descriptive data.
+  #     ")
+  #            )
+  #   )
+  # ),
   ## Filter dropdowns ----------------
   fluidRow(
     # Count of studies on the left
