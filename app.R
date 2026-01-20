@@ -394,6 +394,29 @@ document.addEventListener("DOMContentLoaded", function() {
     )
   ),
   
+  # Updated to add "purpose" dropdown under the title for comms team tracking
+  fluidRow(
+    column(
+      12,
+      div(
+        style = "margin-left: 10px; margin-top: 10px; margin-bottom: 6px; max-width: 275px;",
+        shinyWidgets::pickerInput(
+          inputId = "dashboard_purpose",
+          label   = "I am using this dashboard for:",
+          choices = c(
+            "No specific reason, just exploring" = "exploring",
+            "Research purposes"                  = "research",
+            "Policy or practice decisions"       = "policy_practice"
+          ),
+          options = list(
+            title = "Select an option"
+          ),
+          width = "100%"
+        )
+      )
+    )
+  ),
+  
   ## Instructions---------
   fluidRow(
     column(12,
