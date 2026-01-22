@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function() {
              HTML("
         Explore information for all included studies, or use the
         drop-downs to filter studies based on specific criteria. 
-        Scroll below the dashboard for additional information on what's reported<br><br>
+        Scroll below the dashboard for additional information on what's reported.<br><br>
       ")
            )
     )
