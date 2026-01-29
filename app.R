@@ -651,7 +651,7 @@ document.addEventListener("DOMContentLoaded", function() {
                       ),
                       div(
                         style = "margin-left: 10px; margin-top: 6px; font-size: 16px",
-                        "For Educational Achivement and Well-Being, a positive SMD indicates an intervention benefit. For all other outcomes, a negative SMD indicates an intervention benefit"
+                        "For Educational Achivement and Well-Being, a positive SMD indicates an intervention benefit. For all other outcomes, a negative SMD indicates an intervention benefit."
                       ),
                       div(
                         style = "margin-left: 10px; margin-top: 6px; margin-bottom: 6px; font-size: 14px",
