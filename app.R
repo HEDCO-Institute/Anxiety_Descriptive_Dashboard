@@ -650,11 +650,15 @@ document.addEventListener("DOMContentLoaded", function() {
                         "Standardized Mean Difference (SMD) from Anxiety Prevention Interventions"
                       ),
                       div(
-                        style = "margin-left: 10px; margin-top: 6px; font-size: 16px",
+                        style = "margin-left: 10px; margin-top: 6px; font-size: 14px",
                         "For Educational Achivement and Well-Being, a positive SMD indicates an intervention benefit. For all other outcomes, a negative SMD indicates an intervention benefit."
                       ),
+                      # div(
+                      #   style = "margin-left: 10px; margin-top: 6px; font-size: 16px",
+                      #   "For all other outcomes, a negative SMD indicates an intervention benefit."
+                      # ),
                       div(
-                        style = "margin-left: 10px; margin-top: 6px; margin-bottom: 6px; font-size: 14px",
+                        style = "margin-left: 10px; margin-top: 6px; margin-bottom: 6px; font-size: 12px",
                         "* Outcomes where effect size was originally reported as categorical in our meta-analysis (e.g., odds ratio) but re-computed to SMD for comparison in this table."
                       ),
                       reactableOutput("forest_tbl", width = "100%")
